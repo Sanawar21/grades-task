@@ -6,6 +6,16 @@ class GradeEntry:
         self.overall_grade = overall_grade
         self.course = course
 
+    @classmethod
+    def from_csv_row(cls, row: list, course: str):
+        return cls(
+            row[1],
+            row[0],
+            row[2],
+            row[3],
+            course,
+        )
+
     def to_dict(self):
         return {
             "First_Name__c": self.firstname,
@@ -14,3 +24,6 @@ class GradeEntry:
             "Overall_Grade__c": self.overall_grade,
             "Course__c": self.course,
         }
+
+    def __str__(self) -> str:
+        return f"{self.email} - {self.course}: {self.overall_grade}"
