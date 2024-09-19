@@ -17,61 +17,21 @@ class AbstractSalesforceClient(ABC, SFType):
     @abstractmethod
     def upload(self, data: dict):
         """Uploads an object to Salesforce"""
-
-
-class AttendanceClient(AbstractSalesforceClient):
-
-    def __init__(self, username, password, security_token):
-        super().__init__(
-            username,
-            password,
-            security_token,
-            "hed__Attendance_Event__c",
-            "login",
-        )
-
-    def upload(self, raw_data: dict):
-        """
-        Uploads an attendance record containing data in the following
-        format:
-        {
-            'First name': 'Sanawar', 
-            'Last name': 'Saeed', 
-            'Email': 'test@g.com', 
-            'Duration': '56 min', 
-            'Time joined': '10:30\u202fPM', 
-            'Time exited': '11:25\u202fPM', 
-            'Date': '2024-05-4T23:26:18+05:00Z', 
-            'Code': 'dnf-fkqv-twc',
-            'Course': 'Course 1'
-        }
-        """
-
-        data = {
-            "Course_Offering_ID__c": raw_data.get("Course"),
-            "Duration__c": raw_data.get("Duration"),
-            "Email__c": raw_data.get("Email"),
-            "First_Name__c": raw_data.get("First name"),
-            "Last_Name__c": raw_data.get("Last name"),
-            "Time_Exited__c": raw_data.get("Time exited"),
-            "Time__c": raw_data.get("Time joined"),
-            "hed__Contact__c": raw_data.get("HED Contact"),  # always None
-            "hed__Date__c": raw_data.get("Date"),
-        }
-
-        return self.create(data)
+        pass
 
 
 class GradesClient(AbstractSalesforceClient):
-    def __init__(self, username, password, security_token):
+    def __init__(self, username, password, security_token, domain):
         super().__init__(
             username,
             password,
             security_token,
             "hed__Term_Grade__c",
-            "test",
+            domain,
         )
 
     def upload(self, grade_entry: GradeEntry):
         data = grade_entry.to_dict()
+        # TODO: Remove this
+        data["hed__Course_Connection__c"] = "a03Au00000jc73eIAA"
         return self.create(data)
