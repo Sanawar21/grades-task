@@ -14,13 +14,11 @@ class BaseClient:
             build_version,
             client_secret_path,
             credentials_path,
-            courses_path,
             scopes,
             force_renew
     ) -> None:
         self.credentials_path = credentials_path
         self.client_secret_path = client_secret_path
-        self.courses_path = courses_path
         self._creds = None
         self.scopes = scopes
         self.service_name = service_name
@@ -50,7 +48,11 @@ class BaseClient:
             return dict(json.load(file))
 
     def __generate_credentials(self):
-        credentials = dict(json.load(open(self.credentials_path)))
+        try:
+            credentials = dict(json.load(open(self.credentials_path)))
+        except FileNotFoundError:
+            credentials = {}
+
         flow = InstalledAppFlow.from_client_secrets_file(
             self.client_secret_path, self.scopes
         )
