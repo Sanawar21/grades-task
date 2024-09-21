@@ -166,3 +166,5 @@ test.py
 /credentials
 /test
 /test/*
+/.temp
+/.temp/*

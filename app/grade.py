@@ -14,7 +14,12 @@ class GradeEntry:
 
     @classmethod
     def from_csv_row(cls, row: list, course: str | None = None):
-        overall_grade = f"{row[3] * 100: .2f}%"
+
+        try:
+            overall_grade = f"{row[3] * 100: .2f}%"
+        except TypeError:
+            overall_grade = row[3]  # grade doesn't exist
+
         return cls(
             row[1],
             row[0],
@@ -33,7 +38,7 @@ class GradeEntry:
         }
 
     def __str__(self) -> str:
-        return f"{self.email} : {self.overall_grade}"
+        return self.__repr__()
 
     def __repr__(self) -> str:
         return f"GradeEntry({self.firstname}, {self.lastname}, {self.email}, {self.overall_grade}, {self.course})"
@@ -52,7 +57,6 @@ class GradeReader:
 
             if start_reading:
                 grade = GradeEntry.from_csv_row(row)
-                print(grade)
                 grades.append(grade)
 
             if row[0] == "Class average":
@@ -85,4 +89,5 @@ class GradeReader:
         grades = self.__read_grades(data)
         for grade in grades:
             grade.course = course_name
+        wb.close()
         return grades

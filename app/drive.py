@@ -1,5 +1,6 @@
 from .client import BaseClient
 
+import os
 from googleapiclient.http import MediaIoBaseDownload
 
 
@@ -9,7 +10,6 @@ class DriveClient(BaseClient):
             self,
             client_secret_path="credentials/secret.json",
             credentials_path="credentials/credentials.json",
-            data_folder="test",
             force_renew=False
     ) -> None:
         super().__init__(
@@ -22,11 +22,13 @@ class DriveClient(BaseClient):
             ],
             force_renew
         )
-        self.data_folder = data_folder
 
-    def get_files(self, folder_id):
+    def download_files(self, folder_id, output_path: str = ".temp"):
         page_token = None
         file_index = 0
+
+        if not os.path.exists(output_path):
+            os.mkdir(output_path)
 
         while True:
             results = self.service.files().list(
@@ -43,7 +45,7 @@ class DriveClient(BaseClient):
                 for item in items:
                     file_id = item["id"]
                     request = self.service.files().get_media(fileId=file_id)
-                    with open(f"test/{file_index}.xlsx", 'wb') as f:
+                    with open(f"{output_path}/{file_index}.xlsx", 'wb') as f:
                         file_index += 1
                         downloader = MediaIoBaseDownload(f, request)
                         done = False
