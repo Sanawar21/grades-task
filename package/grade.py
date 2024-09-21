@@ -1,6 +1,7 @@
 import csv
-import typing
 import openpyxl
+
+from typing import Iterable
 
 
 class GradeEntry:
@@ -13,11 +14,12 @@ class GradeEntry:
 
     @classmethod
     def from_csv_row(cls, row: list, course: str | None = None):
+        overall_grade = f"{row[3] * 100: .2f}%"
         return cls(
             row[1],
             row[0],
             row[2],
-            row[3],
+            overall_grade,
             course,
         )
 
@@ -31,21 +33,31 @@ class GradeEntry:
         }
 
     def __str__(self) -> str:
-        return f"{self.email} - {self.course}: {self.overall_grade}"
+        return f"{self.email} : {self.overall_grade}"
+
+    def __repr__(self) -> str:
+        return f"GradeEntry({self.firstname}, {self.lastname}, {self.email}, {self.overall_grade}, {self.course})"
 
 
 class GradeReader:
 
-    def __read_grades(self, data: typing.Iterable):
+    def __read_grades(self, data: Iterable):
         grades = []
         start_reading = False
         for row in data:
+
+            # prevent index out of range for the last row of the sheet
+            if start_reading and not row:
+                break
+
             if start_reading:
-                grades.append(
-                    GradeEntry.from_csv_row(row)
-                )
+                grade = GradeEntry.from_csv_row(row)
+                print(grade)
+                grades.append(grade)
+
             if row[0] == "Class average":
                 start_reading = True
+
         return grades
 
     def read_grades_from_list(self, data: list[list[str]]) -> list[GradeEntry]:
@@ -66,7 +78,7 @@ class GradeReader:
         return grades
 
     def read_grades_from_xlsx(self, file_path):
-        wb = openpyxl.load_workbook(file_path)
+        wb = openpyxl.load_workbook(file_path, True, data_only=True)
         sheet = wb.active
         data = sheet.values
         course_name = next(data)[0]
