@@ -1,4 +1,5 @@
 from .client import BaseClient
+
 from googleapiclient.http import MediaIoBaseDownload
 
 
@@ -25,31 +26,30 @@ class DriveClient(BaseClient):
 
     def get_files(self, folder_id):
         page_token = None
+        file_index = 0
+
         while True:
-            # Call the Drive v3 API
             results = self.service.files().list(
                 q=f"'{folder_id}' in parents",
                 pageSize=10, fields="nextPageToken, files(id, name)",
-                pageToken=page_token).execute()
+                pageToken=page_token
+            ).execute()
+
             items = results.get('files', [])
 
             if not items:
                 print('No files found.')
             else:
                 for item in items:
-                    print(f'{item["name"]} ({item["id"]})')
-
-                    file_id = item['id']
-                    request = self.service.files().export(fileId=file_id, mimeType='text/csv')
-
-                    with open(f"{self.data_folder}/{item['name']}.csv", 'wb') as fh:
-                        downloader = MediaIoBaseDownload(fh, request)
+                    file_id = item["id"]
+                    request = self.service.files().get_media(fileId=file_id)
+                    with open(f"test/{file_index}.xlsx", 'wb') as f:
+                        file_index += 1
+                        downloader = MediaIoBaseDownload(f, request)
                         done = False
-                        while done is False:
-                            status, done = downloader.next_chunk()
-                            print(
-                                f"Download {int(status.progress() * 100)}%.", end="\r")
-                            print()
+                        while not done:
+                            _, done = downloader.next_chunk()
+                            print(f"Downloading file {item['name']}")
 
             page_token = results.get('nextPageToken', None)
             if page_token is None:

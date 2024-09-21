@@ -1,6 +1,6 @@
 from simple_salesforce import SalesforceLogin, SFType
 from abc import ABC, abstractmethod
-from .grade_entry import GradeEntry
+from .grade import GradeEntry
 from typing import Literal
 
 

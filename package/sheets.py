@@ -10,7 +10,6 @@ class SheetsClient(BaseClient):
             self,
             client_secret_path="data/secret.json",
             credentials_path="data/credentials.json",
-            courses_path="data/courses.json",
             force_renew=False
     ) -> None:
         super().__init__(
@@ -18,9 +17,8 @@ class SheetsClient(BaseClient):
             "v4",
             client_secret_path,
             credentials_path,
-            courses_path,
             [
-                "https://www.googleapis.com/auth/spreadsheets"
+                "https://www.googleapis.com/auth/spreadsheets.readonly"
             ],
             force_renew
         )
@@ -50,7 +48,7 @@ class SheetsClient(BaseClient):
                 spreadsheet["title"] = data.get("properties").get("title")
                 return spreadsheet
 
-            except (TimeoutError, HttpError):
+            except (TimeoutError, HttpError) as e:
                 print("Google spreadsheets' read operation timed out, trying again.")
 
         return None
